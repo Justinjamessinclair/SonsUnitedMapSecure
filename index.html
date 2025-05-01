@@ -194,20 +194,24 @@
         .catch(err => console.error('Icon load error:', err));
     });
 
-    // ---- JSONP fetchData() ----
-    function fetchData() {
-      spinner.style.display = 'block';
-      window.dataCallback = data => {
-        spinner.style.display = 'none';
-        contacts = data.map(r => ({ ...r, coords: null }));
-        basicInfo.textContent = `Fetched ${contacts.length} contacts`;
-        geocodeAll();
-      };
-      const s = document.createElement('script');
-      s.src =
-        'https://script.google.com/macros/s/AKfycbz6zzyBHLqwxv1VuIJZTr3o4aOUf1s8HEMYeCQtT97FuVbyyUECNORHmeo9oM5OnDXz2w/exec' +
-        '?callback=dataCallback';
-      document.head.appendChild(s);
+// ---- JSONP fetchData() ----
+function fetchData() {
+  spinner.style.display = 'block';
+
+  // JSONP callback: the Apps-Script must call this
+  window.dataCallback = data => {
+    spinner.style.display = 'none';
+    contacts = data.map(r => ({ ...r, coords: null }));
+    basicInfo.textContent = `Fetched ${contacts.length} contacts`;
+    geocodeAll();
+  };
+
+  // inject the <script> tag with ?callback=dataCallback
+  const s = document.createElement('script');
+  s.src = 
+    'https://script.google.com/macros/s/AKfycbz6zzyBHLqwxv1VuIJZTr3o4aOUf1s8HEMYeCQtT97FuVbyyUECNORHmeo9oM5OnDXz2w/exec'
+    + '?callback=dataCallback';
+  document.head.appendChild(s);
     }
 
     async function geocodeAll() {
