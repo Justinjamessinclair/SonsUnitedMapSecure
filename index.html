@@ -197,22 +197,31 @@
 // ---- JSONP fetchData() ----
 function fetchData() {
   spinner.style.display = 'block';
+  console.log('→ injecting JSONP script…');
 
-  // JSONP callback: the Apps-Script must call this
+  // JSONP callback
   window.dataCallback = data => {
+    console.log('⚡ dataCallback fired, rows:', data.length);
     spinner.style.display = 'none';
     contacts = data.map(r => ({ ...r, coords: null }));
     basicInfo.textContent = `Fetched ${contacts.length} contacts`;
     geocodeAll();
   };
 
-  // inject the <script> tag with ?callback=dataCallback
   const s = document.createElement('script');
-  s.src = 
-    'https://script.google.com/macros/s/AKfycbz6zzyBHLqwxv1VuIJZTr3o4aOUf1s8HEMYeCQtT97FuVbyyUECNORHmeo9oM5OnDXz2w/exec'
-    + '?callback=dataCallback';
+  s.src =
+    'https://script.google.com/macros/s/AKfycbz6zzyBHLqwxv1VuIJZTr3o4aOUf1s8HEMYeCQtT97FuVbyyUECNORHmeo9oM5OnDXz2w/exec' +
+    '?callback=dataCallback';
+
+  // Error handler if script fails
+  s.onerror = () => {
+    console.error('❌ JSONP script failed to load:', s.src);
+    spinner.style.display = 'none';
+    basicInfo.textContent = 'Error loading contacts';
+  };
+
   document.head.appendChild(s);
-    }
+}
 
     async function geocodeAll() {
       await Promise.all(
